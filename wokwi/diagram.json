@@ -1,0 +1,589 @@
+{
+ "version": 1,
+ "author": "proyecto",
+ "editor": "wokwi",
+ "parts": [
+  {
+   "type": "board-esp32-devkit-c-v4",
+   "id": "esp",
+   "top": 0,
+   "left": 0,
+   "attrs": {}
+  },
+  {
+   "type": "wokwi-pushbutton",
+   "id": "btn_a1",
+   "top": -60,
+   "left": 200,
+   "attrs": {
+    "color": "blue",
+    "label": "Audio 1"
+   }
+  },
+  {
+   "type": "wokwi-resistor",
+   "id": "r_a1",
+   "top": 90,
+   "left": 190,
+   "rotate": 90,
+   "attrs": {
+    "value": "220"
+   }
+  },
+  {
+   "type": "wokwi-led",
+   "id": "led_a1",
+   "top": 170,
+   "left": 200,
+   "attrs": {
+    "color": "blue"
+   }
+  },
+  {
+   "type": "wokwi-pushbutton",
+   "id": "btn_a2",
+   "top": -60,
+   "left": 260,
+   "attrs": {
+    "color": "blue",
+    "label": "Audio 2"
+   }
+  },
+  {
+   "type": "wokwi-resistor",
+   "id": "r_a2",
+   "top": 90,
+   "left": 250,
+   "rotate": 90,
+   "attrs": {
+    "value": "220"
+   }
+  },
+  {
+   "type": "wokwi-led",
+   "id": "led_a2",
+   "top": 170,
+   "left": 260,
+   "attrs": {
+    "color": "blue"
+   }
+  },
+  {
+   "type": "wokwi-pushbutton",
+   "id": "btn_a3",
+   "top": -60,
+   "left": 320,
+   "attrs": {
+    "color": "blue",
+    "label": "Audio 3"
+   }
+  },
+  {
+   "type": "wokwi-resistor",
+   "id": "r_a3",
+   "top": 90,
+   "left": 310,
+   "rotate": 90,
+   "attrs": {
+    "value": "220"
+   }
+  },
+  {
+   "type": "wokwi-led",
+   "id": "led_a3",
+   "top": 170,
+   "left": 320,
+   "attrs": {
+    "color": "blue"
+   }
+  },
+  {
+   "type": "wokwi-pushbutton",
+   "id": "btn_a4",
+   "top": -60,
+   "left": 380,
+   "attrs": {
+    "color": "blue",
+    "label": "Audio 4"
+   }
+  },
+  {
+   "type": "wokwi-resistor",
+   "id": "r_a4",
+   "top": 90,
+   "left": 370,
+   "rotate": 90,
+   "attrs": {
+    "value": "220"
+   }
+  },
+  {
+   "type": "wokwi-led",
+   "id": "led_a4",
+   "top": 170,
+   "left": 380,
+   "attrs": {
+    "color": "blue"
+   }
+  },
+  {
+   "type": "wokwi-pushbutton",
+   "id": "btn_v1",
+   "top": -60,
+   "left": 440,
+   "attrs": {
+    "color": "red",
+    "label": "Video 1"
+   }
+  },
+  {
+   "type": "wokwi-resistor",
+   "id": "r_v1",
+   "top": 90,
+   "left": 430,
+   "rotate": 90,
+   "attrs": {
+    "value": "220"
+   }
+  },
+  {
+   "type": "wokwi-led",
+   "id": "led_v1",
+   "top": 170,
+   "left": 440,
+   "attrs": {
+    "color": "red"
+   }
+  },
+  {
+   "type": "wokwi-pushbutton",
+   "id": "btn_v2",
+   "top": -60,
+   "left": 500,
+   "attrs": {
+    "color": "red",
+    "label": "Video 2"
+   }
+  },
+  {
+   "type": "wokwi-resistor",
+   "id": "r_v2",
+   "top": 90,
+   "left": 490,
+   "rotate": 90,
+   "attrs": {
+    "value": "220"
+   }
+  },
+  {
+   "type": "wokwi-led",
+   "id": "led_v2",
+   "top": 170,
+   "left": 500,
+   "attrs": {
+    "color": "red"
+   }
+  },
+  {
+   "type": "wokwi-pushbutton",
+   "id": "btn_v3",
+   "top": -60,
+   "left": 560,
+   "attrs": {
+    "color": "red",
+    "label": "Video 3"
+   }
+  },
+  {
+   "type": "wokwi-resistor",
+   "id": "r_v3",
+   "top": 90,
+   "left": 550,
+   "rotate": 90,
+   "attrs": {
+    "value": "220"
+   }
+  },
+  {
+   "type": "wokwi-led",
+   "id": "led_v3",
+   "top": 170,
+   "left": 560,
+   "attrs": {
+    "color": "red"
+   }
+  },
+  {
+   "type": "wokwi-pushbutton",
+   "id": "btn_v4",
+   "top": -60,
+   "left": 620,
+   "attrs": {
+    "color": "red",
+    "label": "Video 4"
+   }
+  },
+  {
+   "type": "wokwi-resistor",
+   "id": "r_v4",
+   "top": 90,
+   "left": 610,
+   "rotate": 90,
+   "attrs": {
+    "value": "220"
+   }
+  },
+  {
+   "type": "wokwi-led",
+   "id": "led_v4",
+   "top": 170,
+   "left": 620,
+   "attrs": {
+    "color": "red"
+   }
+  },
+  {
+   "type": "wokwi-slide-potentiometer",
+   "id": "pot_vol",
+   "top": 290,
+   "left": 200,
+   "attrs": {}
+  },
+  {
+   "type": "wokwi-slide-potentiometer",
+   "id": "pot_bpm",
+   "top": 290,
+   "left": 330,
+   "attrs": {}
+  },
+  {
+   "type": "wokwi-resistor",
+   "id": "r_beat",
+   "top": 90,
+   "left": 650,
+   "rotate": 90,
+   "attrs": {
+    "value": "220"
+   }
+  },
+  {
+   "type": "wokwi-led",
+   "id": "led_beat",
+   "top": 170,
+   "left": 660,
+   "attrs": {
+    "color": "yellow",
+    "label": "Beat"
+   }
+  }
+ ],
+ "connections": [
+  [
+   "esp:TX",
+   "$serialMonitor:RX",
+   "",
+   []
+  ],
+  [
+   "esp:RX",
+   "$serialMonitor:TX",
+   "",
+   []
+  ],
+  [
+   "esp:13",
+   "btn_a1:1.l",
+   "green",
+   []
+  ],
+  [
+   "btn_a1:2.l",
+   "esp:GND.1",
+   "black",
+   []
+  ],
+  [
+   "esp:15",
+   "r_a1:1",
+   "orange",
+   []
+  ],
+  [
+   "r_a1:2",
+   "led_a1:A",
+   "orange",
+   []
+  ],
+  [
+   "led_a1:C",
+   "esp:GND.2",
+   "black",
+   []
+  ],
+  [
+   "esp:14",
+   "btn_a2:1.l",
+   "green",
+   []
+  ],
+  [
+   "btn_a2:2.l",
+   "esp:GND.1",
+   "black",
+   []
+  ],
+  [
+   "esp:2",
+   "r_a2:1",
+   "orange",
+   []
+  ],
+  [
+   "r_a2:2",
+   "led_a2:A",
+   "orange",
+   []
+  ],
+  [
+   "led_a2:C",
+   "esp:GND.2",
+   "black",
+   []
+  ],
+  [
+   "esp:27",
+   "btn_a3:1.l",
+   "green",
+   []
+  ],
+  [
+   "btn_a3:2.l",
+   "esp:GND.1",
+   "black",
+   []
+  ],
+  [
+   "esp:4",
+   "r_a3:1",
+   "orange",
+   []
+  ],
+  [
+   "r_a3:2",
+   "led_a3:A",
+   "orange",
+   []
+  ],
+  [
+   "led_a3:C",
+   "esp:GND.2",
+   "black",
+   []
+  ],
+  [
+   "esp:26",
+   "btn_a4:1.l",
+   "green",
+   []
+  ],
+  [
+   "btn_a4:2.l",
+   "esp:GND.1",
+   "black",
+   []
+  ],
+  [
+   "esp:16",
+   "r_a4:1",
+   "orange",
+   []
+  ],
+  [
+   "r_a4:2",
+   "led_a4:A",
+   "orange",
+   []
+  ],
+  [
+   "led_a4:C",
+   "esp:GND.2",
+   "black",
+   []
+  ],
+  [
+   "esp:25",
+   "btn_v1:1.l",
+   "green",
+   []
+  ],
+  [
+   "btn_v1:2.l",
+   "esp:GND.1",
+   "black",
+   []
+  ],
+  [
+   "esp:17",
+   "r_v1:1",
+   "orange",
+   []
+  ],
+  [
+   "r_v1:2",
+   "led_v1:A",
+   "orange",
+   []
+  ],
+  [
+   "led_v1:C",
+   "esp:GND.2",
+   "black",
+   []
+  ],
+  [
+   "esp:33",
+   "btn_v2:1.l",
+   "green",
+   []
+  ],
+  [
+   "btn_v2:2.l",
+   "esp:GND.1",
+   "black",
+   []
+  ],
+  [
+   "esp:5",
+   "r_v2:1",
+   "orange",
+   []
+  ],
+  [
+   "r_v2:2",
+   "led_v2:A",
+   "orange",
+   []
+  ],
+  [
+   "led_v2:C",
+   "esp:GND.2",
+   "black",
+   []
+  ],
+  [
+   "esp:32",
+   "btn_v3:1.l",
+   "green",
+   []
+  ],
+  [
+   "btn_v3:2.l",
+   "esp:GND.1",
+   "black",
+   []
+  ],
+  [
+   "esp:18",
+   "r_v3:1",
+   "orange",
+   []
+  ],
+  [
+   "r_v3:2",
+   "led_v3:A",
+   "orange",
+   []
+  ],
+  [
+   "led_v3:C",
+   "esp:GND.2",
+   "black",
+   []
+  ],
+  [
+   "esp:23",
+   "btn_v4:1.l",
+   "green",
+   []
+  ],
+  [
+   "btn_v4:2.l",
+   "esp:GND.1",
+   "black",
+   []
+  ],
+  [
+   "esp:19",
+   "r_v4:1",
+   "orange",
+   []
+  ],
+  [
+   "r_v4:2",
+   "led_v4:A",
+   "orange",
+   []
+  ],
+  [
+   "led_v4:C",
+   "esp:GND.2",
+   "black",
+   []
+  ],
+  [
+   "pot_vol:SIG",
+   "esp:34",
+   "purple",
+   []
+  ],
+  [
+   "pot_vol:VCC",
+   "esp:3V3",
+   "red",
+   []
+  ],
+  [
+   "pot_vol:GND",
+   "esp:GND.1",
+   "black",
+   []
+  ],
+  [
+   "pot_bpm:SIG",
+   "esp:35",
+   "purple",
+   []
+  ],
+  [
+   "pot_bpm:VCC",
+   "esp:3V3",
+   "red",
+   []
+  ],
+  [
+   "pot_bpm:GND",
+   "esp:GND.1",
+   "black",
+   []
+  ],
+  [
+   "esp:22",
+   "r_beat:1",
+   "orange",
+   []
+  ],
+  [
+   "r_beat:2",
+   "led_beat:A",
+   "orange",
+   []
+  ],
+  [
+   "led_beat:C",
+   "esp:GND.2",
+   "black",
+   []
+  ]
+ ],
+ "dependencies": {}
+}

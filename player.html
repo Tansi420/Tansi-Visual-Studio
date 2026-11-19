@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen&family=VT323&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/mqtt@4.3.7/dist/mqtt.min.js"></script>
+<style>
+  :root { color-scheme: dark; }
+  html, body { margin: 0; height: 100%; background: #000; color: #eee;
+               font-family: 'VT323', ui-monospace, Menlo, monospace; overflow: hidden;
+               cursor: url(/app/static/ui/cursor.png) 2 2, auto; }
+  #stage { position: relative; width: 100%; height: 100%; overflow: hidden; }
+  #fx { position: absolute; inset: 0; will-change: transform, filter; }
+  video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+          opacity: 0; transition: opacity .12s linear; }
+  video.on { opacity: 1; }
+  #hud { position: absolute; left: 10px; right: 10px; bottom: 8px; display: flex; gap: 8px;
+         align-items: center; font-size: 18px; z-index: 3; }
+  #hud span, #hud button { background: #000b; padding: 2px 8px; border: 1px solid #39ff14; color: #b8ffb0; text-shadow: 0 0 4px #39ff14; }
+  #hud button { cursor: pointer; font: inherit; display: none; margin-left: auto; }
+  #hud button.live { background: #ff2fd0; color: #fff; border-color: #ffc2ee; animation: blink 1s steps(1) infinite; }
+  #scan { position: absolute; inset: 0; z-index: 2; pointer-events: none;
+          background: repeating-linear-gradient(0deg, rgba(0,0,0,.30) 0 1px, transparent 1px 3px); }
+  #rec { position: absolute; top: 8px; left: 12px; z-index: 3; font-family: 'Silkscreen', monospace; font-size: 11px;
+         color: #ff4d6d; text-shadow: 0 0 6px #f00; animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  #start { position: absolute; inset: 0; z-index: 5; display: flex; flex-direction: column;
+           align-items: center; justify-content: center; gap: 8px; background: #000d;
+           cursor: pointer; font-family: 'Silkscreen', monospace; color: #caff7a; text-shadow: 0 0 10px #39ff14;
+           font-size: 20px; letter-spacing: .15em; }
+  #startmsg { animation: blink 1.3s steps(1) infinite; }
+  #start small { font-family: 'VT323', monospace; font-size: 20px; letter-spacing: 0; color: #ff5fd2; text-shadow: none; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="fx">
+    <video id="v1" src="/app/static/video1.mp4" muted loop playsinline preload="auto"></video>
+    <video id="v2" src="/app/static/video2.mp4" muted loop playsinline preload="auto"></video>
+    <video id="v3" src="/app/static/video3.mp4" muted loop playsinline preload="auto"></video>
+    <video id="v4" src="/app/static/video4.mp4" muted loop playsinline preload="auto"></video>
+  </div>
+  <div id="scan"></div>
+  <div id="rec">● REC · TANSI-CAM 01</div>
+  <div id="start"><div id="startmsg">▶ INICIAR SHOW</div><small>clic para habilitar el audio</small></div>
+  <div id="hud">
+    <span id="mq">MQTT …</span><span id="info"></span><span id="heard" style="display:none"></span>
+    <button id="mic">🎤 Escuchar</button>
+  </div>
+</div>
+<script>
+(() => {
+  const BASE = "__BASE__", VOICE = __VOICE__, BPM_BASE = __BPM_BASE__;
+  const $ = id => document.getElementById(id);
+  const st = { audio: 1, video: 1, volumen: 80, bpm: BPM_BASE, invierte: 0, silencio: 0 };
+  const vids = [1, 2, 3, 4].map(i => $("v" + i));
+  let ctx, mix, master, analyser, gains = [], srcs = [], started = false, level = 0;
+
+  // ---- aplicar estado (todo llega por MQTT: estado/*) ----
+  const showVideo = () => vids.forEach((v, i) => v.classList.toggle("on", i + 1 === st.video));
+  function rate() {                              // BPM -> velocidad (efecto vinilo: cambia el tono)
+    const r = st.bpm / BPM_BASE;
+    vids.forEach(v => { v.playbackRate = r; });
+    if (started) srcs.forEach(s => s.playbackRate.setTargetAtTime(r, ctx.currentTime, 0.04));
+  }
+  function mixAudio() {                          // los 4 audios suenan sincronizados; solo uno tiene ganancia
+    if (!started) return;
+    const t = ctx.currentTime;
+    gains.forEach((g, i) => g.gain.setTargetAtTime(i + 1 === st.audio ? 1 : 0, t, 0.025));
+    master.gain.setTargetAtTime(st.silencio ? 0 : st.volumen / 100, t, 0.025);
+  }
+  function hud() {
+    $("info").textContent = `A${st.audio} · V${st.video} · ${st.bpm} BPM (${(st.bpm / BPM_BASE).toFixed(2)}x) · Vol ${st.volumen}`
+      + (st.invierte ? " · INV" : "") + (st.silencio ? " · MUTE" : "");
+  }
+  const applyAll = () => { showVideo(); rate(); mixAudio(); hud(); };
+
+  // ---- audio: Web Audio API, 4 loops arrancados al mismo instante ----
+  async function start() {
+    if (started) return;
+    try {
+      ctx = new (window.AudioContext || window.webkitAudioContext)();
+      mix = ctx.createGain(); master = ctx.createGain(); analyser = ctx.createAnalyser();
+      analyser.fftSize = 512; analyser.smoothingTimeConstant = 0.55;
+      mix.connect(analyser);                     // el análisis va antes del volumen: los visuales reaccionan aun en silencio
+      mix.connect(master); master.connect(ctx.destination);
+      $("startmsg").textContent = "CARGANDO…";
+      const bufs = await Promise.all([1, 2, 3, 4].map(async i => {
+        const r = await fetch(`/app/static/audio${i}.mp3`);
+        if (!r.ok) throw new Error("audio" + i);
+        return ctx.decodeAudioData(await r.arrayBuffer());
+      }));
+      const t0 = ctx.currentTime + 0.15;
+      bufs.forEach(b => {
+        const s = ctx.createBufferSource(); s.buffer = b; s.loop = true;
+        const g = ctx.createGain(); g.gain.value = 0;
+        s.connect(g); g.connect(mix); s.start(t0);
+        srcs.push(s); gains.push(g);
+      });
+      started = true;
+      vids.forEach(v => v.play().catch(() => {}));
+      $("start").style.display = "none";
+      applyAll(); requestAnimationFrame(loop);
+    } catch (e) {
+      $("startmsg").textContent = "ERROR: no se cargó el audio (¿enableStaticServing?)";
+      console.error(e);
+    }
+  }
+  $("start").addEventListener("click", start);
+
+  // ---- visuales reactivos a los graves ----
+  const data = new Uint8Array(256);
+  function loop() {
+    analyser.getByteFrequencyData(data);
+    let b = 0; for (let i = 0; i < 4; i++) b += data[i];
+    level = Math.max(b / (4 * 255), level * 0.85);          // ataque rápido, caída suave
+    const fx = $("fx");
+    fx.style.transform = `scale(${1 + level * 0.07})`;
+    fx.style.filter = (st.invierte ? "invert(1) " : "") + `brightness(${0.8 + level * 0.7}) saturate(${1 + level * 0.8})`;
+    requestAnimationFrame(loop);
+  }
+
+  // ---- MQTT por WebSocket seguro ----
+  const cli = mqtt.connect("wss://broker.hivemq.com:8884/mqtt",
+    { clientId: "player-" + Math.random().toString(16).slice(2, 10), reconnectPeriod: 2000 });
+  const mq = $("mq");
+  cli.on("connect", () => { mq.textContent = "MQTT ●"; mq.style.color = "#6f6"; cli.subscribe(BASE + "/estado/#"); });
+  cli.on("close", () => { mq.textContent = "MQTT ○"; mq.style.color = "#f66"; });
+  cli.on("message", (topic, msg) => {
+    const k = topic.split("/").pop();
+    if (!(k in st)) return;
+    const v = parseInt(msg.toString(), 10);
+    if (Number.isNaN(v)) return;
+    st[k] = v; applyAll();
+  });
+
+  // ---- voz (Web Speech API): publica el texto; el backend lo interpreta ----
+  if (VOICE) {
+    const mic = $("mic"), heard = $("heard");
+    mic.style.display = "inline-block"; heard.style.display = "inline-block";
+    const say = t => { heard.textContent = t; };
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const ERR = {
+      "not-allowed": "permiso de micrófono denegado (candado del navegador / Ajustes del sistema)",
+      "service-not-allowed": "el navegador bloquea el reconocimiento de voz aquí",
+      "audio-capture": "no se detecta ningún micrófono",
+      "network": "sin conexión con el servicio de voz",
+      "no-speech": "no te escuché, habla más cerca",
+    };
+    if (!SR) {
+      mic.disabled = true; mic.textContent = "🎤 no disponible"; say("este navegador no soporta voz: usa Chrome/Edge o la grabadora de abajo");
+    } else {
+      const rec = new SR(); rec.lang = "es-CO"; rec.continuous = true; rec.interimResults = false;
+      let on = false;
+      const ui = () => { mic.textContent = on ? "🎤 Escuchando…" : "🎤 Escuchar"; mic.classList.toggle("live", on); };
+      rec.onstart = () => say("escuchando…");
+      rec.onspeechstart = () => say("voz detectada…");
+      rec.onresult = e => {
+        const txt = e.results[e.results.length - 1][0].transcript.trim();
+        say("“" + txt + "”");
+        cli.publish(BASE + "/cmd/texto", txt);
+      };
+      rec.onerror = e => {
+        say("mic: " + (ERR[e.error] || e.error));
+        if (["not-allowed", "service-not-allowed", "audio-capture"].includes(e.error)) { on = false; ui(); }
+      };
+      rec.onend = () => { if (on) { try { rec.start(); } catch (_) {} } };
+      mic.onclick = async () => {
+        if (on) { on = false; ui(); rec.stop(); say(""); return; }
+        try {                                     // pide el permiso explícitamente para ver el error real
+          const s = await navigator.mediaDevices.getUserMedia({ audio: true });
+          s.getTracks().forEach(t => t.stop());
+        } catch (err) { say("micrófono bloqueado: " + err.name); return; }
+        on = true; ui();
+        try { rec.start(); } catch (_) {}
+      };
+    }
+  }
+  applyAll();
+})();
+</script>
+</body>
+</html>

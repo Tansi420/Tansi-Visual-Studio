@@ -1,0 +1,9 @@
+[server]
+enableStaticServing = true   # sirve ./static (videos y audios) en /app/static/
+
+[theme]
+base = "dark"
+primaryColor = "#ff5fd2"
+backgroundColor = "#05020c"
+secondaryBackgroundColor = "#12062a"
+textColor = "#b8ffb0"
